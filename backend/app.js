@@ -42,7 +42,10 @@ app.get("/health", (_req, res) => {
     status: "ok",
     timestamp: new Date().toISOString(),
     service: "TNEB Backend API",
-    dbState: process.env.MONGO_URI ? "configured" : "missing_mongo_uri",
+    dbState:
+      process.env.MONGO_URI || process.env.MONGO_PUBLIC_URL || process.env.MONGO_URL
+        ? "configured"
+        : "missing_mongo_uri",
   });
 });
 

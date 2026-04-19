@@ -134,6 +134,7 @@ So frontend should use:
 
 ### Troubleshooting
 - If Vercel shows `FUNCTION_INVOCATION_FAILED`, verify backend env vars are set in project settings (especially `MONGO_URI` and `JWT_SECRET`).
+- If you use Railway Mongo plugin vars, backend also accepts `MONGO_PUBLIC_URL` and `MONGO_URL` automatically.
 - `/health` now returns `dbState` so you can quickly confirm whether `MONGO_URI` is configured.
 
 ## 📡 API Reference

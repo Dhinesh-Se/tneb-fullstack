@@ -33,3 +33,4 @@ See root `README.md` for full API reference and deployment instructions.
 
 
 Set environment variables from the Vercel/Netlify dashboard.
+Railway Mongo vars also work: `MONGO_PUBLIC_URL` / `MONGO_URL` (fallback when `MONGO_URI` is not set).
