@@ -1,0 +1,115 @@
+.billing-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.search-box {
+  margin: 20px 0;
+}
+
+.search-box input {
+  padding: 8px;
+  margin-right: 10px;
+}
+
+.search-box button {
+  padding: 8px 16px;
+}
+
+.billing-card {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+}
+
+.billing-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.billing-table th,
+.billing-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+/* ✅ STATUS COLORS */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.status-paid {
+  color: #155724;
+  background-color: #d4edda;
+}
+
+.status-unpaid {
+  color: #721c24;
+  background-color: #f8d7da;
+}
+
+/* ✅ SUMMARY BOXES */
+.pending-box {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: #f8d7da;
+  color: #721c24;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.paid-box {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: #d4edda;
+  color: #155724;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.btn-secondary {
+  padding: 6px 12px;
+  margin-bottom: 10px;
+}
+
+.consumer-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 8px 16px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.consumer-grid strong {
+  color: #333;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.status-unpaid {
+  color: #721c24;
+  background-color: #f8d7da;
+}
+
+.status-paid {
+  color: #155724;
+  background-color: #d4edda;
+}
+
+.consumer-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 8px 16px;
+  margin-bottom: 15px;
+}

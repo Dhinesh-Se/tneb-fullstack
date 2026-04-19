@@ -1,0 +1,163 @@
+/* ---------- PAGE LAYOUT ---------- */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+}
+
+.container {
+  padding: 20px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+/* ---------- HEADINGS ---------- */
+h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+h3 {
+  margin-top: 30px;
+  margin-bottom: 15px;
+  color: #34495e;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ---------- FORM ---------- */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+form select,
+form input {
+  padding: 10px 12px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 160px;
+  transition: border-color 0.2s ease;
+}
+
+form select:focus,
+form input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+form input[type="date"] {
+  min-width: 150px;
+}
+
+form select:disabled,
+form input:disabled {
+  background-color: #eaeaea;
+}
+
+/* ---------- BUTTONS ---------- */
+button {
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-right: 8px;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Pay Bill button */
+.pay-btn {
+  background-color: #e67e22;
+  margin-right: 8px;
+}
+
+.pay-btn:hover {
+  background-color: #d35400;
+}
+
+/* ---------- TABLE ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+thead {
+  background-color: #34495e;
+  color: #ffffff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+th,
+td {
+  padding: 12px 10px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+}
+
+tr:hover {
+  background-color: #ecf0f5;
+  transition: background-color 0.2s ease;
+}
+
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+/* ---------- STATUS COLORS ---------- */
+.status-paid {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.status-unpaid {
+  color: #c0392b;
+  font-weight: bold;
+}
+
+/* ---------- AMOUNT ---------- */
+.amount {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  table {
+    font-size: 12px;
+  }
+}
+  
