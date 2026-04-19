@@ -132,6 +132,10 @@ So frontend should use:
 - If you use multiple frontend domains, separate them with commas.
   - Example: `https://app1.vercel.app,https://app2.netlify.app`
 
+### Troubleshooting
+- If Vercel shows `FUNCTION_INVOCATION_FAILED`, verify backend env vars are set in project settings (especially `MONGO_URI` and `JWT_SECRET`).
+- `/health` now returns `dbState` so you can quickly confirm whether `MONGO_URI` is configured.
+
 ## 📡 API Reference
 
 ### Auth

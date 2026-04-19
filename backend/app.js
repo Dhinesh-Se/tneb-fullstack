@@ -11,7 +11,9 @@ const consumptionRoutes = require("./routes/consumption");
 const app = express();
 
 // ── Connect DB ──────────────────────────────────
-connectDB();
+connectDB().catch((err) => {
+  console.error("Mongo bootstrap error:", err.message);
+});
 
 // ── Middleware ──────────────────────────────────
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:3000")
@@ -40,6 +42,7 @@ app.get("/health", (_req, res) => {
     status: "ok",
     timestamp: new Date().toISOString(),
     service: "TNEB Backend API",
+    dbState: process.env.MONGO_URI ? "configured" : "missing_mongo_uri",
   });
 });
 
@@ -48,6 +51,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/consumer", consumerRoutes);
 app.use("/api/consumption", consumptionRoutes);
 
+
+// ── Ignore favicon requests ─────────────────────
+app.get("/favicon.ico", (_req, res) => {
+  res.status(204).end();
+});
 // ── 404 handler ─────────────────────────────────
 app.use((_req, res) => {
   res.status(404).json({ message: "Route not found" });
