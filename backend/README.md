@@ -25,4 +25,8 @@ curl -X POST http://localhost:5292/api/auth/seed
 GET /health
 ```
 
+## Deployment targets
+- **Vercel:** uses `vercel.json`, entrypoint `app.js`
+- **Netlify:** uses `netlify/functions/api.js` + `netlify.toml`
+
 See root `README.md` for full API reference and deployment instructions.
