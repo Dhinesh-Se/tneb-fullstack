@@ -85,6 +85,7 @@ You can deploy **both frontend and backend** on either **Vercel** or **Netlify**
    - `JWT_EXPIRES_IN` (example: `24h`)
    - `CLIENT_URL` (your frontend production URL)
 4. Deploy. The `backend/vercel.json` routes requests to `app.js`.
+5. In the Vercel project settings, add the environment variables directly (do not use missing secret aliases like `@mongo_uri`).
 
 #### Frontend (Vercel)
 1. Create a second Vercel project from the same repo.

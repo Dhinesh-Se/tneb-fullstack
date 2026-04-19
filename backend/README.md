@@ -30,3 +30,6 @@ GET /health
 - **Netlify:** uses `netlify/functions/api.js` + `netlify.toml`
 
 See root `README.md` for full API reference and deployment instructions.
+
+
+Set environment variables from the Vercel/Netlify dashboard.
