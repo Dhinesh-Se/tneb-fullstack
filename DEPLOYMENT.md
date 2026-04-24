@@ -64,3 +64,22 @@ Create **two Netlify sites** from the same repository:
 cd backend
 npm run check:env
 ```
+
+
+## CI/CD auto-linking (frontend API URL auto-update)
+
+A GitHub Actions workflow is included at `.github/workflows/vercel-monorepo-deploy.yml`.
+
+What it does:
+1. Deploys backend first.
+2. Captures deployed backend URL.
+3. Writes that URL into `frontend/.env.production` as `REACT_APP_API_URL`.
+4. Builds and deploys frontend using that exact backend URL.
+
+Required GitHub Secrets:
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_BACKEND_PROJECT_ID`
+- `VERCEL_FRONTEND_PROJECT_ID`
+
+This removes manual URL replacement in every deploy.

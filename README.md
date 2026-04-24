@@ -74,7 +74,7 @@ npm start         # starts on port 3000
 
 You can deploy **both frontend and backend** on either **Vercel** or **Netlify**.
 
-See `DEPLOYMENT.md` for a complete production runbook.
+See `DEPLOYMENT.md` for a complete production runbook, including CI/CD auto-linking via `.github/workflows/vercel-monorepo-deploy.yml`.
 
 ### Option A — Deploy both on Vercel (recommended)
 
