@@ -72,36 +72,81 @@ npm start         # starts on port 3000
 
 ## 🌐 Deployment
 
-### Backend → Vercel
+You can deploy **both frontend and backend** on either **Vercel** or **Netlify**.
 
-1. Push the `backend/` folder to a GitHub repo (or a subfolder)
-2. Create a new Vercel project → import repo
-3. Set **Root Directory** to `backend`
-4. Add Environment Variables in Vercel dashboard:
-   - `MONGO_URI` → your Atlas connection string
-   - `JWT_SECRET` → a strong random string
-   - `JWT_EXPIRES_IN` → `24h`
-   - `CLIENT_URL` → your frontend Vercel/Netlify URL
-5. Deploy — Vercel uses `vercel.json` automatically
+See `DEPLOYMENT.md` for a complete production runbook, including CI/CD auto-linking via `.github/workflows/vercel-monorepo-deploy.yml` and `.github/workflows/netlify-monorepo-deploy.yml`.
 
-### Backend → Netlify (Functions)
-Not recommended for Express. Use Vercel, Railway, or Render instead.
+### Option A — Deploy both on Vercel (recommended)
 
-### Frontend → Vercel
+#### Backend (Vercel)
+1. In Vercel, create a project from this repo.
+2. Set **Root Directory** to `backend`.
+3. Add environment variables:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `JWT_EXPIRES_IN` (example: `24h`)
+   - `CLIENT_URL` (your frontend production URL)
+4. Deploy. The `backend/vercel.json` routes requests to `app.js`.
+5. In the Vercel project settings, add the environment variables directly (do not use missing secret aliases like `@mongo_uri`).
 
-1. Push `frontend/` to GitHub
-2. New Vercel project → import → set Root Directory to `frontend`
-3. Add Environment Variable:
-   - `REACT_APP_API_URL` → your deployed backend URL (e.g. `https://tneb-api.vercel.app`)
-4. Deploy — `vercel.json` handles SPA routing
-
-### Frontend → Netlify
-
-1. Connect repo, set base directory to `frontend`, build command `npm run build`, publish `build`
-2. Add env var `REACT_APP_API_URL`
-3. `netlify.toml` handles SPA redirects automatically
+#### Frontend (Vercel)
+1. Create a second Vercel project from the same repo.
+2. Set **Root Directory** to `frontend`.
+3. Add env var:
+   - `REACT_APP_API_URL` = your backend URL (example: `https://your-backend.vercel.app`)
+4. Deploy. `frontend/vercel.json` handles SPA rewrites.
 
 ---
+
+### Option B — Deploy both on Netlify
+
+#### Backend (Netlify Functions)
+1. In Netlify, create a new site from this repo.
+2. Set **Base directory** to `backend`.
+3. Netlify reads `backend/netlify.toml` and deploys Express as a Function at:
+   - `/.netlify/functions/api/*`
+4. Add environment variables:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `JWT_EXPIRES_IN` (example: `24h`)
+   - `CLIENT_URL` (your frontend production URL)
+
+**Backend URL tip:** your public API base becomes:
+- `https://<your-site>.netlify.app/.netlify/functions/api`
+
+So frontend should use:
+- `REACT_APP_API_URL=https://<your-site>.netlify.app/.netlify/functions/api`
+
+#### Frontend (Netlify)
+1. Create another Netlify site from the same repo.
+2. Set **Base directory** to `frontend`.
+3. Build settings:
+   - Build command: `npm run build`
+   - Publish directory: `build`
+4. Add env var:
+   - `REACT_APP_API_URL` = deployed backend URL
+5. Deploy. `frontend/netlify.toml` handles SPA redirects.
+
+---
+
+### CORS checklist (important)
+- Set backend `CLIENT_URL` to the exact frontend domain.
+- If you use multiple frontend domains, separate them with commas.
+  - Example: `https://app1.vercel.app,https://app2.netlify.app`
+- For first-time go-live debugging, you can temporarily set `ALLOW_ALL_ORIGINS=true`, then switch back to restricted mode.
+
+### Troubleshooting
+- Run backend env validation before deploy: `cd backend && npm run check:env`
+- If Vercel shows `FUNCTION_INVOCATION_FAILED`, verify backend env vars are set in project settings (especially `MONGO_URI` and `JWT_SECRET`).
+- If you use Railway Mongo plugin vars, backend accepts `MONGO_PUBLIC_URL` / `MONGO_URL` automatically and will append `MONGO_DB_NAME` when URL has no database segment.
+- `/health` now returns `dbState` so you can quickly confirm whether `MONGO_URI` is configured.
+
+#### Railway Mongo → Backend env mapping (for your screenshot)
+- `MONGO_URI` = use Railway `MONGO_PUBLIC_URL` value
+- `MONGO_DB_NAME` = `tneb_db`
+- `JWT_SECRET` = generate with `cd backend && npm run generate:jwt-secret`
+- `JWT_EXPIRES_IN` = `24h`
+- `CLIENT_URL` = your deployed frontend URL
 
 ## 📡 API Reference
 
