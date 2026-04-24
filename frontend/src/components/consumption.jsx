@@ -154,7 +154,7 @@ export default function Consumption() {
     <div className="page-wrapper">
       <GovHeader />
       <div className="breadcrumb">
-        <a onClick={() => navigate("/")}>Home</a><span className="sep">›</span>
+        <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }}>Home</a><span className="sep">›</span>
         <span>Consumption Management</span>
       </div>
       <div className="page-title-bar">
