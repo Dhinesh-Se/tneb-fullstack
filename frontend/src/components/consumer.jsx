@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { api } from "../api";
 import { useNavigate } from "react-router-dom";
 import GovHeader from "./GovHeader";
@@ -34,11 +34,11 @@ export default function Consumer() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const loadConsumers = async () => {
+  const loadConsumers = useCallback(async () => {
     try { const res = await api.get("/api/consumer"); setBackendData(res.data); }
     catch { showToast("Failed to load consumers", "error"); }
-  };
-  useEffect(() => { loadConsumers(); }, []);
+  }, []);
+  useEffect(() => { loadConsumers(); }, [loadConsumers]);
 
   const validate = () => {
     const e = {};
@@ -146,7 +146,7 @@ export default function Consumer() {
     <div className="page-wrapper">
       <GovHeader />
       <div className="breadcrumb">
-        <a onClick={() => navigate("/")}>Home</a><span className="sep">›</span>
+        <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }}>Home</a><span className="sep">›</span>
         <span>Consumer Management</span>
       </div>
       <div className="page-title-bar">
