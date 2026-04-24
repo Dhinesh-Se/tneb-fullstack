@@ -82,10 +82,6 @@ Required GitHub Secrets:
 - `VERCEL_BACKEND_PROJECT_ID`
 - `VERCEL_FRONTEND_PROJECT_ID`
 
-If any secret is missing, workflow now fails early with a clear message (for example: `Missing VERCEL_TOKEN secret`).
-
-This workflow uses remote build via `vercel deploy --prod` (avoids local `vercel build` toolchain issues like `spawn npm ENOENT`).
-
 This removes manual URL replacement in every deploy.
 
 
