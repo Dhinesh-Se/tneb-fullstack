@@ -48,3 +48,4 @@ Generate a strong JWT secret:
 npm run generate:jwt-secret
 ```
 JWT aliases are supported: `JWT_SECRET` (recommended), `JWT_KEY`, or `JWT_SECRET_KEY`.
+Mongo credential aliases also supported: `MONGO_INITDB_ROOT_USERNAME` / `MONGO_INITDB_ROOT_PASSWORD`.

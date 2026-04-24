@@ -34,8 +34,8 @@ const getMongoUri = () => {
 
   const host = process.env.MONGOHOST;
   const port = process.env.MONGOPORT || "27017";
-  const user = process.env.MONGOUSER;
-  const password = process.env.MONGOPASSWORD;
+  const user = process.env.MONGOUSER || process.env.MONGO_INITDB_ROOT_USERNAME;
+  const password = process.env.MONGOPASSWORD || process.env.MONGO_INITDB_ROOT_PASSWORD;
 
   if (host && user && password) {
     const raw = `mongodb://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}`;

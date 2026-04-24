@@ -3,7 +3,9 @@ const hasMongoUri = Boolean(
   process.env.MONGO_URI ||
     process.env.MONGO_PUBLIC_URL ||
     process.env.MONGO_URL ||
-    (process.env.MONGOHOST && process.env.MONGOUSER && process.env.MONGOPASSWORD)
+    (process.env.MONGOHOST &&
+      (process.env.MONGOUSER || process.env.MONGO_INITDB_ROOT_USERNAME) &&
+      (process.env.MONGOPASSWORD || process.env.MONGO_INITDB_ROOT_PASSWORD))
 );
 
 const checks = [
