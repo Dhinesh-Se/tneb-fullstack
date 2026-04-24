@@ -34,3 +34,5 @@ See root `README.md` for full API reference and deployment instructions.
 
 Set environment variables from the Vercel/Netlify dashboard.
 Railway Mongo vars also work: `MONGO_PUBLIC_URL` / `MONGO_URL` (fallback when `MONGO_URI` is not set).
+If Mongo URL has no database name, set `MONGO_DB_NAME=tneb_db` (backend auto-appends it).
+For first deployment checks only, you can set `ALLOW_ALL_ORIGINS=true`, then lock down `CLIENT_URL`.

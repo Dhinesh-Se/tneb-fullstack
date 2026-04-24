@@ -16,15 +16,26 @@ connectDB().catch((err) => {
 });
 
 // ── Middleware ──────────────────────────────────
-const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:3000")
-  .split(",")
-  .map((o) => o.trim());
+const envOrigins = [
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.APP_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+]
+  .filter(Boolean)
+  .flatMap((value) => value.split(","))
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins = [...new Set(envOrigins)];
+const allowAllOrigins =
+  process.env.ALLOW_ALL_ORIGINS === "true" || allowedOrigins.length === 0;
 
 app.use(
   cors({
     origin: (origin, cb) => {
-      // Allow same-origin requests (tools, Postman) and listed origins
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      // Allow tools/postman (no origin) and optionally all origins for quick deployments
+      if (!origin || allowAllOrigins || allowedOrigins.includes(origin)) return cb(null, true);
       cb(new Error(`CORS blocked: ${origin}`));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -46,6 +57,8 @@ app.get("/health", (_req, res) => {
       process.env.MONGO_URI || process.env.MONGO_PUBLIC_URL || process.env.MONGO_URL
         ? "configured"
         : "missing_mongo_uri",
+    corsMode: allowAllOrigins ? "open" : "restricted",
+    allowedOrigins,
   });
 });
 
