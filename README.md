@@ -139,6 +139,13 @@ So frontend should use:
 - If you use Railway Mongo plugin vars, backend accepts `MONGO_PUBLIC_URL` / `MONGO_URL` automatically and will append `MONGO_DB_NAME` when URL has no database segment.
 - `/health` now returns `dbState` so you can quickly confirm whether `MONGO_URI` is configured.
 
+#### Railway Mongo → Backend env mapping (for your screenshot)
+- `MONGO_URI` = use Railway `MONGO_PUBLIC_URL` value
+- `MONGO_DB_NAME` = `tneb_db`
+- `JWT_SECRET` = generate with `cd backend && npm run generate:jwt-secret`
+- `JWT_EXPIRES_IN` = `24h`
+- `CLIENT_URL` = your deployed frontend URL
+
 ## 📡 API Reference
 
 ### Auth

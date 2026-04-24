@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "check:env": "node scripts/validateEnv.js"
+    "check:env": "node scripts/validateEnv.js",
+    "generate:jwt-secret": "node scripts/generateJwtSecret.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
