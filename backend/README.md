@@ -25,4 +25,27 @@ curl -X POST http://localhost:5292/api/auth/seed
 GET /health
 ```
 
+## Deployment targets
+
+## Validate environment before deploy
+```bash
+npm run check:env
+```
+
+- **Vercel:** uses `vercel.json`, entrypoint `app.js`
+- **Netlify:** uses `netlify/functions/api.js` + `netlify.toml`
+
 See root `README.md` for full API reference and deployment instructions.
+
+
+Set environment variables from the Vercel/Netlify dashboard.
+Railway Mongo vars also work: `MONGO_PUBLIC_URL` / `MONGO_URL` (fallback when `MONGO_URI` is not set).
+If Mongo URL has no database name, set `MONGO_DB_NAME=tneb_db` (backend auto-appends it).
+For first deployment checks only, you can set `ALLOW_ALL_ORIGINS=true`, then lock down `CLIENT_URL`.
+
+Generate a strong JWT secret:
+```bash
+npm run generate:jwt-secret
+```
+JWT aliases are supported: `JWT_SECRET` (recommended), `JWT_KEY`, or `JWT_SECRET_KEY`.
+Mongo credential aliases also supported: `MONGO_INITDB_ROOT_USERNAME` / `MONGO_INITDB_ROOT_PASSWORD`.
