@@ -47,3 +47,4 @@ Generate a strong JWT secret:
 ```bash
 npm run generate:jwt-secret
 ```
+JWT aliases are supported: `JWT_SECRET` (recommended), `JWT_KEY`, or `JWT_SECRET_KEY`.

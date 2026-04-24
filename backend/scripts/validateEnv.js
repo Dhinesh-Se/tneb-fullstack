@@ -9,8 +9,8 @@ const hasMongoUri = Boolean(
 const checks = [
   {
     name: "JWT_SECRET",
-    ok: Boolean(process.env.JWT_SECRET),
-    help: "Set a long random string in hosting dashboard.",
+    ok: Boolean(process.env.JWT_SECRET || process.env.JWT_KEY || process.env.JWT_SECRET_KEY),
+    help: "Set JWT_SECRET (or JWT_KEY / JWT_SECRET_KEY) to a long random string.",
   },
   {
     name: "Mongo connection",
