@@ -26,6 +26,12 @@ GET /health
 ```
 
 ## Deployment targets
+
+## Validate environment before deploy
+```bash
+npm run check:env
+```
+
 - **Vercel:** uses `vercel.json`, entrypoint `app.js`
 - **Netlify:** uses `netlify/functions/api.js` + `netlify.toml`
 

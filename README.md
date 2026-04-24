@@ -134,6 +134,7 @@ So frontend should use:
 - For first-time go-live debugging, you can temporarily set `ALLOW_ALL_ORIGINS=true`, then switch back to restricted mode.
 
 ### Troubleshooting
+- Run backend env validation before deploy: `cd backend && npm run check:env`
 - If Vercel shows `FUNCTION_INVOCATION_FAILED`, verify backend env vars are set in project settings (especially `MONGO_URI` and `JWT_SECRET`).
 - If you use Railway Mongo plugin vars, backend accepts `MONGO_PUBLIC_URL` / `MONGO_URL` automatically and will append `MONGO_DB_NAME` when URL has no database segment.
 - `/health` now returns `dbState` so you can quickly confirm whether `MONGO_URI` is configured.
