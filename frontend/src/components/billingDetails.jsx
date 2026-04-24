@@ -62,7 +62,7 @@ export default function BillingDetails() {
       </header>
 
       <div style={{ background:"var(--gray-200)", borderBottom:"1px solid var(--gray-300)", padding:"8px 28px", fontSize:12.5, color:"var(--gray-500)", display:"flex", gap:6 }}>
-        <a style={{ color:"var(--gov-blue-mid)", cursor:"pointer" }} onClick={() => navigate("/")}>Home</a>
+        <a href="/" style={{ color:"var(--gov-blue-mid)", cursor:"pointer" }} onClick={(e) => { e.preventDefault(); navigate("/"); }}>Home</a>
         <span>›</span><span>Billing Details</span>
       </div>
 
