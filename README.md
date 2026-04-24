@@ -74,6 +74,8 @@ npm start         # starts on port 3000
 
 You can deploy **both frontend and backend** on either **Vercel** or **Netlify**.
 
+See `DEPLOYMENT.md` for a complete production runbook.
+
 ### Option A — Deploy both on Vercel (recommended)
 
 #### Backend (Vercel)

@@ -1,0 +1,66 @@
+# Deployment Runbook (Frontend + Backend)
+
+This runbook gives exact steps to publish both services.
+
+## Option A (Recommended): Vercel + Vercel
+
+Create **two Vercel projects** from the same Git repository:
+
+1. **Backend project**
+   - Root Directory: `backend`
+   - Framework preset: Other
+   - Build settings: default
+   - Required environment variables:
+     - `MONGO_URI` = your Railway `MONGO_PUBLIC_URL`
+     - `MONGO_DB_NAME` = `tneb_db`
+     - `JWT_SECRET` = output from `cd backend && npm run generate:jwt-secret`
+     - `JWT_EXPIRES_IN` = `24h`
+     - `CLIENT_URL` = frontend Vercel domain (for CORS)
+     - `ALLOW_ALL_ORIGINS` = `false` (set `true` only for first smoke test)
+
+2. **Frontend project**
+   - Root Directory: `frontend`
+   - Framework preset: Create React App
+   - Required environment variables:
+     - `REACT_APP_API_URL` = backend Vercel URL (example: `https://<backend>.vercel.app`)
+
+### Post-deploy checks
+- Backend health: `GET https://<backend>.vercel.app/health`
+- Backend auth route should respond (not 404): `POST https://<backend>.vercel.app/api/auth/login`
+- Frontend loads and login page reaches backend API.
+
+---
+
+## Option B: Netlify + Netlify
+
+Create **two Netlify sites** from the same repository:
+
+1. **Backend site**
+   - Base directory: `backend`
+   - Netlify file used: `backend/netlify.toml`
+   - Environment variables: same as backend Vercel section.
+   - Public API base URL:
+     - `https://<backend-site>.netlify.app/.netlify/functions/api`
+
+2. **Frontend site**
+   - Base directory: `frontend`
+   - Build command: `npm run build`
+   - Publish directory: `build`
+   - Environment variables:
+     - `REACT_APP_API_URL` = backend Netlify functions URL above
+
+### Post-deploy checks
+- Backend health: `GET https://<backend-site>.netlify.app/.netlify/functions/api/health`
+- Frontend can log in and fetch consumers.
+
+---
+
+## Safety notes
+- Rotate secrets if shared in screenshots.
+- Keep `ALLOW_ALL_ORIGINS=false` after initial validation.
+- Run env check before deployment:
+
+```bash
+cd backend
+npm run check:env
+```
