@@ -83,3 +83,19 @@ Required GitHub Secrets:
 - `VERCEL_FRONTEND_PROJECT_ID`
 
 This removes manual URL replacement in every deploy.
+
+
+## CI/CD auto-linking for Netlify
+
+A GitHub Actions workflow is included at `.github/workflows/netlify-monorepo-deploy.yml`.
+
+What it does:
+1. Deploys backend Netlify site first.
+2. Reads deployed backend site URL from Netlify CLI JSON output.
+3. Sets frontend `REACT_APP_API_URL` to `<backend-site>/.netlify/functions/api`.
+4. Builds and deploys frontend site.
+
+Required GitHub Secrets:
+- `NETLIFY_AUTH_TOKEN`
+- `NETLIFY_BACKEND_SITE_ID`
+- `NETLIFY_FRONTEND_SITE_ID`
