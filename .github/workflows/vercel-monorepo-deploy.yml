@@ -35,9 +35,7 @@ jobs:
         id: deploy
         working-directory: backend
         run: |
-          URL=$(vercel deploy --prod --yes --token="$VERCEL_TOKEN" \
-            --env ALLOW_ALL_ORIGINS=true \
-            --env CLIENT_URL="https://tneb-fullstack.vercel.app,${FRONTEND_FALLBACK_URL}")
+          URL=$(vercel deploy --prod --yes --token="$VERCEL_TOKEN")
           CLEAN_URL=$(echo "$URL" | tail -n 1 | tr -d '\r')
           echo "backend_url=https://${CLEAN_URL#https://}" >> "$GITHUB_OUTPUT"
 
