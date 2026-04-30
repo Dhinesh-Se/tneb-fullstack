@@ -15,6 +15,8 @@ export default function BillingDetails() {
   const [searchErr, setSearchErr] = useState("");
   const [result, setResult]     = useState(null);
   const [loading, setLoading]   = useState(false);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [sortOrder, setSortOrder] = useState("DESC");
 
   const handleSearch = async () => {
     if (!search.trim()) { setSearchErr("Please enter a Consumption Number"); return; }
@@ -34,8 +36,42 @@ export default function BillingDetails() {
 
   const c          = result?.consumer;
   const bills      = result?.consumption || [];
-  const unpaidBills  = bills.filter(b => getStatus(b) === "UNPAID");
+  const unpaidBills  = bills.filter((b) => getStatus(b) === "UNPAID");
+  const paidBills    = bills.filter((b) => getStatus(b) === "PAID");
   const unpaidTotal  = unpaidBills.reduce((s,b) => s + toN(b.amount || b.Amount), 0);
+  const paidTotal    = paidBills.reduce((s,b) => s + toN(b.amount || b.Amount), 0);
+  const filteredBills = (statusFilter === "ALL" ? bills : bills.filter((b) => getStatus(b) === statusFilter))
+    .slice()
+    .sort((a, b) => {
+      const da = new Date(a.billDate || a.recordedDate || 0).getTime();
+      const db = new Date(b.billDate || b.recordedDate || 0).getTime();
+      return sortOrder === "DESC" ? db - da : da - db;
+    });
+
+  const downloadCsv = () => {
+    if (!filteredBills.length) return;
+    const rows = [
+      ["Bill Date", "Units(kWh)", "Amount", "Status"],
+      ...filteredBills.map((bill) => [
+        fmtDate(bill.billDate || bill.recordedDate),
+        bill.unitsConsumed,
+        bill.amount,
+        getStatus(bill),
+      ]),
+    ];
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `billing-history-${search || "consumer"}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div style={{ minHeight:"100vh", background:"var(--gray-100)", display:"flex", flexDirection:"column" }}>
@@ -122,20 +158,44 @@ export default function BillingDetails() {
 
               {/* Bills Table */}
               <div className="table-wrapper" style={{ marginBottom:20 }}>
-                <div className="table-header"><h3>⚡ Billing History ({bills.length} records)</h3></div>
+                <div className="table-header">
+                  <h3>⚡ Billing History ({filteredBills.length} records)</h3>
+                  <div className="table-filters">
+                    <select
+                      className="table-filter-input"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="ALL">All Statuses</option>
+                      <option value="PAID">Paid</option>
+                      <option value="UNPAID">Unpaid</option>
+                    </select>
+                    <select
+                      className="table-filter-input"
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(e.target.value)}
+                    >
+                      <option value="DESC">Newest first</option>
+                      <option value="ASC">Oldest first</option>
+                    </select>
+                    <button className="btn btn-secondary btn-sm" onClick={downloadCsv} disabled={!filteredBills.length}>
+                      ⬇ Export CSV
+                    </button>
+                  </div>
+                </div>
                 <div className="table-scroll">
                   <table className="gov-table">
                     <thead>
                       <tr><th>Bill Date</th><th>Units (kWh)</th><th>Amount</th><th>Status</th></tr>
                     </thead>
                     <tbody>
-                      {bills.length === 0 ? (
+                      {filteredBills.length === 0 ? (
                         <tr><td colSpan="4" className="table-empty">No billing records found.</td></tr>
-                      ) : bills.map((bill, i) => {
+                      ) : filteredBills.map((bill, i) => {
                         const status = getStatus(bill);
                         return (
                           <tr key={i}>
-                            <td>{fmtDate(bill.recordedDate)}</td>
+                            <td>{fmtDate(bill.billDate || bill.recordedDate)}</td>
                             <td>{bill.unitsConsumed} kWh</td>
                             <td style={{ fontWeight:600 }}>{fmtCur(bill.amount)}</td>
                             <td><span className={`badge badge-${status === "PAID" ? "paid" : "unpaid"}`}>{status === "PAID" ? "✓ Paid" : "✗ Unpaid"}</span></td>
@@ -144,6 +204,21 @@ export default function BillingDetails() {
                       })}
                     </tbody>
                   </table>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginBottom: 20 }}>
+                <div className="card" style={{ padding: 12 }}>
+                  <div className="text-muted">Total Bills</div>
+                  <div style={{ fontSize: 22, fontWeight: 700 }}>{bills.length}</div>
+                </div>
+                <div className="card" style={{ padding: 12 }}>
+                  <div className="text-muted">Paid Amount</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: "var(--gov-green)" }}>{fmtCur(paidTotal)}</div>
+                </div>
+                <div className="card" style={{ padding: 12 }}>
+                  <div className="text-muted">Pending Amount</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: "var(--gov-red)" }}>{fmtCur(unpaidTotal)}</div>
                 </div>
               </div>
 
