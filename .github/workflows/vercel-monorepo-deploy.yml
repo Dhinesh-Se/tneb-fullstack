@@ -28,14 +28,13 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Pull backend Vercel project settings
-        run: vercel pull --cwd backend --yes --environment=production --token="$VERCEL_TOKEN"
+        working-directory: backend
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Deploy backend
         id: deploy
         run: |
-          URL=$(vercel deploy --cwd backend --prod --yes --token="$VERCEL_TOKEN" \
-            --env ALLOW_ALL_ORIGINS=true \
-            --env CLIENT_URL="https://tneb-fullstack.vercel.app,${FRONTEND_FALLBACK_URL}")
+          URL=$(vercel deploy --prod --yes --token="$VERCEL_TOKEN")
           CLEAN_URL=$(echo "$URL" | tail -n 1 | tr -d '\r')
           echo "backend_url=https://${CLEAN_URL#https://}" >> "$GITHUB_OUTPUT"
 
@@ -63,7 +62,8 @@ jobs:
         run: vercel pull --cwd frontend --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Deploy frontend with backend URL
+        working-directory: frontend
         run: |
           API_URL="${REACT_APP_API_URL:-https://tneb-fullstack.vercel.app}"
           echo "Using API URL: $API_URL"
-          vercel deploy --cwd frontend --prod --yes --token="$VERCEL_TOKEN" --build-env REACT_APP_API_URL="$API_URL"
+          vercel deploy --prod --yes --token="$VERCEL_TOKEN" --build-env REACT_APP_API_URL="$API_URL"
