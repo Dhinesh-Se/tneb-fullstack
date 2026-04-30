@@ -90,7 +90,7 @@ export default function Home() {
     }
 
     try {
-      await api.post("/api/login/register", {
+      await api.post("/api/auth/register", {
         AdminId: newUser.adminId,
         Password: newUser.password,
         Role: newUser.role,
