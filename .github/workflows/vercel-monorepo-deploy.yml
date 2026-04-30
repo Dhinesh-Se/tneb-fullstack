@@ -33,7 +33,6 @@ jobs:
 
       - name: Deploy backend
         id: deploy
-        working-directory: backend
         run: |
           URL=$(vercel deploy --prod --yes --token="$VERCEL_TOKEN")
           CLEAN_URL=$(echo "$URL" | tail -n 1 | tr -d '\r')
@@ -60,8 +59,7 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Pull frontend Vercel project settings
-        working-directory: frontend
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        run: vercel pull --cwd frontend --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Deploy frontend with backend URL
         working-directory: frontend
