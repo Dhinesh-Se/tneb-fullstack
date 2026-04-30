@@ -109,4 +109,36 @@ router.post("/change-password", authenticate, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────
+// POST /api/auth/register
+// ADMIN can create ADMIN / MANAGER users
+// ─────────────────────────────────────────────────
+router.post("/register", authenticate, authorize("ADMIN"), async (req, res) => {
+  try {
+    const adminId = (req.body.adminId || req.body.AdminId || "").trim();
+    const password = req.body.password || req.body.Password;
+    const role = (req.body.role || req.body.Role || "MANAGER").toString().toUpperCase().trim();
+    const name = (req.body.name || req.body.Name || adminId || "New User").trim();
+
+    if (!adminId || !password) {
+      return res.status(400).json({ message: "adminId and password are required" });
+    }
+    if (!["ADMIN", "MANAGER"].includes(role)) {
+      return res.status(400).json({ message: "role must be ADMIN or MANAGER" });
+    }
+
+    const exists = await Admin.findOne({ adminId });
+    if (exists) return res.status(409).json({ message: "adminId already exists" });
+
+    const user = new Admin({ adminId, password, role, name, isActive: true });
+    await user.save();
+    res.status(201).json({
+      message: "User created successfully",
+      user: { adminId: user.adminId, role: user.role, name: user.name },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create user" });
+  }
+});
+
 module.exports = router;
