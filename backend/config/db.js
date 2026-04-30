@@ -45,8 +45,10 @@ const getMongoUri = () => {
   return null;
 };
 
-const getMongooseOptions = () => {
-  return {
+const getMongooseOptions = (mongoUri = "") => {
+  const isSrv = mongoUri.startsWith("mongodb+srv://");
+  const useRailwayProxy = process.env.MONGO_USE_RAILWAY_PROXY === "true";
+  const options = {
     // Connection timeouts
     serverSelectionTimeoutMS: parseInt(process.env.MONGO_TIMEOUT || "5000"),
     socketTimeoutMS: parseInt(process.env.MONGO_SOCKET_TIMEOUT || "45000"),
@@ -54,20 +56,25 @@ const getMongooseOptions = () => {
     // Connection pooling (optimized for production and Railway)
     maxPoolSize: parseInt(process.env.MONGO_MAX_POOL || "10"),
     minPoolSize: parseInt(process.env.MONGO_MIN_POOL || "2"),
-    
-    // SSL/TLS configuration (disabled for Railway proxy)
-    ssl: false,
-    tls: false,
-    
-    // Authentication - root user must auth against admin database
-    authSource: 'admin',
-    
-    // Disable features that don't work on single-instance MongoDB
-    retryWrites: false,
-    
+
     // Reconnection strategy
     family: 4, // Use IPv4 explicitly
   };
+
+  // Atlas / mongodb+srv requires TLS.
+  if (isSrv) {
+    options.tls = true;
+  }
+
+  // Railway proxy mode (opt-in) can require custom auth settings.
+  if (useRailwayProxy) {
+    options.authSource = process.env.MONGO_AUTH_SOURCE || "admin";
+    options.retryWrites = false;
+    options.tls = false;
+    options.ssl = false;
+  }
+
+  return options;
 };
 
 const connectDB = async () => {
@@ -90,7 +97,7 @@ const connectDB = async () => {
     return connectPromise;
   }
 
-  const mongoOptions = getMongooseOptions();
+  const mongoOptions = getMongooseOptions(mongoUri);
   
   // Log connection attempt (without exposing password)
   const sanitizedUri = mongoUri.replace(/:[^:@]+@/, ':***@');

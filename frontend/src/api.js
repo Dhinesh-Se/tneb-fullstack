@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5292",
+  baseURL: process.env.REACT_APP_API_URL || "https://tneb-fullstack.vercel.app",
 });
 
 // Automatically attach JWT token
