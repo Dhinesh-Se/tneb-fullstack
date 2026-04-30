@@ -117,12 +117,19 @@ router.post("/", authenticate, authorize("ADMIN"), async (req, res) => {
 
     const no     = (ConsumptionNo || consumptionNo || "").trim();
     const units  = Number(UnitsConsumed || unitsConsumed);
-    const date   = BillDate || billDate;
+    const dateStr = BillDate || billDate;
     const status = (PaymentStatus || paymentStatus || "UNPAID").toString().toUpperCase();
 
+    // Validation
     if (!no)           return res.status(400).json({ message: "Consumption number is required" });
     if (!units || units <= 0) return res.status(400).json({ message: "Valid units consumed required" });
-    if (!date)         return res.status(400).json({ message: "Bill date is required" });
+    if (!dateStr)      return res.status(400).json({ message: "Bill date is required" });
+
+    // Parse and validate date
+    const billDateObj = new Date(dateStr);
+    if (isNaN(billDateObj.getTime())) {
+      return res.status(400).json({ message: "Invalid bill date format. Use YYYY-MM-DD or ISO format" });
+    }
 
     // Verify consumer exists
     const consumer = await Consumer.findOne({ consumptionNo: no, isActive: true });
@@ -132,8 +139,9 @@ router.post("/", authenticate, authorize("ADMIN"), async (req, res) => {
     const record = new Consumption({
       consumptionNo: no,
       unitsConsumed: units,
-      billDate: new Date(date),
+      billDate: billDateObj,
       paymentStatus: status,
+      // amount is auto-calculated by pre-save hook in model
     });
     await record.save();
     res.status(201).json(record);

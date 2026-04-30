@@ -45,7 +45,33 @@ const getMongoUri = () => {
   return null;
 };
 
+const getMongooseOptions = () => {
+  return {
+    // Connection timeouts
+    serverSelectionTimeoutMS: parseInt(process.env.MONGO_TIMEOUT || "5000"),
+    socketTimeoutMS: parseInt(process.env.MONGO_SOCKET_TIMEOUT || "45000"),
+    
+    // Connection pooling (optimized for production and Railway)
+    maxPoolSize: parseInt(process.env.MONGO_MAX_POOL || "10"),
+    minPoolSize: parseInt(process.env.MONGO_MIN_POOL || "2"),
+    
+    // SSL/TLS configuration (disabled for Railway proxy)
+    ssl: false,
+    tls: false,
+    
+    // Authentication - root user must auth against admin database
+    authSource: 'admin',
+    
+    // Disable features that don't work on single-instance MongoDB
+    retryWrites: false,
+    
+    // Reconnection strategy
+    family: 4, // Use IPv4 explicitly
+  };
+};
+
 const connectDB = async () => {
+  // Return existing connection if already connected
   if (mongoose.connection.readyState === 1) {
     return true;
   }
@@ -59,20 +85,42 @@ const connectDB = async () => {
     return false;
   }
 
+  // Return existing promise if connection is in progress
   if (connectPromise) {
     return connectPromise;
   }
 
+  const mongoOptions = getMongooseOptions();
+  
+  // Log connection attempt (without exposing password)
+  const sanitizedUri = mongoUri.replace(/:[^:@]+@/, ':***@');
+  console.log(`🔄 Connecting to MongoDB: ${sanitizedUri}`);
+  console.log(`📊 Options:`, { 
+    maxPoolSize: mongoOptions.maxPoolSize,
+    minPoolSize: mongoOptions.minPoolSize,
+    serverSelectionTimeoutMS: mongoOptions.serverSelectionTimeoutMS
+  });
+
   connectPromise = mongoose
-    .connect(mongoUri, {
-      serverSelectionTimeoutMS: 5000,
-    })
+    .connect(mongoUri, mongoOptions)
     .then((conn) => {
       console.log(`✅ MongoDB connected: ${conn.connection.host}/${conn.connection.name}`);
+      
+      // Setup connection event listeners
+      conn.connection.on('error', (err) => {
+        console.error('❌ MongoDB connection error:', err.message);
+      });
+      
+      conn.connection.on('disconnected', () => {
+        console.warn('⚠️ MongoDB disconnected');
+        connectPromise = null;
+      });
+      
       return true;
     })
     .catch((err) => {
-      console.error("❌ MongoDB connection error:", err.message);
+      console.error("❌ MongoDB connection failed:", err.message);
+      console.error("📍 Connection string:", sanitizedUri);
       connectPromise = null;
       return false;
     });

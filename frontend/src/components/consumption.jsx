@@ -44,6 +44,7 @@ export default function Consumption() {
   useEffect(() => { loadData(); }, []);
 
   const allData = (backendData).map((x) => ({
+    _id: x._id,
     ConsumptionNo: x.ConsumptionNo || x.consumptionNo,
     UnitsConsumed: x.UnitsConsumed || x.unitsConsumed,
     BillDate: getValidDate(x.BillDate || x.billDate || x.RecordedDate || x.recordedDate),
@@ -108,13 +109,12 @@ export default function Consumption() {
     if (!validate()) return;
     setSaving(true);
     const normalizedDate = normDate(formData.BillDate);
-    const amount = Number(formData.UnitsConsumed) * RATE_PER_UNIT;
     try {
       await api.post("/api/consumption", {
         consumptionNo: formData.ConsumptionNo,
         unitsConsumed: Number(formData.UnitsConsumed),
-        recordedDate: `${normalizedDate}T00:00:00`,
-        paymentStatus: "UNPAID", amount
+        billDate: normalizedDate,
+        paymentStatus: "UNPAID"
       });
       showToast("Bill generated successfully.");
       setFormData({ ConsumptionNo:"", UnitsConsumed:"", BillDate:"", PaymentStatus:"UNPAID", Amount:"" });
@@ -126,19 +126,15 @@ export default function Consumption() {
   };
 
   const handlePay = async (row) => {
-    if (payingId === row.ConsumptionNo) return;
+    if (payingId === row._id) return;
     if (!window.confirm(`Confirm payment for Consumption No: ${row.ConsumptionNo}?\nAmount: ₹${row.Amount}`)) return;
-    setPayingId(row.ConsumptionNo);
+    setPayingId(row._id);
     try {
-      const nd = normDate(row.BillDate);
-      await api.put(`/api/consumption/${row.ConsumptionNo}`, {
-        consumptionNo: row.ConsumptionNo, unitsConsumed: Number(row.UnitsConsumed),
-        recordedDate: `${nd}T00:00:00`, paymentStatus: "PAID", amount: Number(row.Amount),
-      });
+      await api.patch(`/api/consumption/${row._id}/pay`, {});
       showToast(`Payment of ₹${row.Amount} recorded successfully.`);
       await loadData();
-    } catch {
-      showToast("Payment update failed", "error");
+    } catch (error) {
+      showToast(error.response?.data?.message || "Payment update failed", "error");
     } finally { setPayingId(null); }
   };
 
