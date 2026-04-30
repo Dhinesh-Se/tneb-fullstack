@@ -5,7 +5,6 @@ import { Line, Bar, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale,LinearScale,PointElement,LineElement,BarElement,ArcElement,Title,Tooltip,Legend, Filler} from "chart.js";
 import { fetchConsumers } from "../redux/slices/consumerSlice";
 import { fetchConsumption } from "../redux/slices/consumptionSlice";
-import { logout } from "../redux/slices/authSlice";
 import { api } from "../api";
 import GovHeader from "./GovHeader";
 
@@ -25,17 +24,14 @@ ChartJS.register(
 /* ── helpers ── */
 const fmt    = (n) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 const toN    = (v) => Number(v || 0);
-const norm   = (x) => (x?.paymentStatus ?? x?.PaymentStatus ?? "").toString().trim().toLowerCase();
 const fmtNum = (n) => new Intl.NumberFormat("en-IN").format(n);
 
 export default function Home() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const userRole = useSelector((state) => state.auth.role);
   const consumers = useSelector((state) => state.consumers.list);
   const consumptionList = useSelector((state) => state.consumption.list);
-  const isAdmin = userRole === "ADMIN";
 
   const [searchConsumptionNo, setSearchConsumptionNo] = useState("");
   const [searchResult, setSearchResult] = useState(null);
@@ -76,8 +72,6 @@ export default function Home() {
   const totalUnits = consumptionList.reduce((s, x) => s + toNumber(x.unitsConsumed), 0);
   const collRate = totalAmount === 0 ? 0 : ((totalPaidAmount / totalAmount) * 100).toFixed(1);
 
-  const handleLogout = () => { dispatch(logout()); navigate("/login"); };
-
   const handleAddUserChange = (e) => {
     setNewUser({ ...newUser, [e.target.name]: e.target.value });
     setRegisterMessage("");
@@ -90,7 +84,7 @@ export default function Home() {
     }
 
     try {
-      await api.post("/api/login/register", {
+      await api.post("/api/auth/register", {
         AdminId: newUser.adminId,
         Password: newUser.password,
         Role: newUser.role,
@@ -178,8 +172,6 @@ export default function Home() {
     const w = c.wardNo || c.WardNo || "Unknown";
     wardMap[w] = (wardMap[w] || 0) + 1;
   });
-  const wardLabels = Object.keys(wardMap).sort();
-  const wardData = wardLabels.map((w) => wardMap[w]);
 
   const dateStr = currentTime.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
   const timeStr = currentTime.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
