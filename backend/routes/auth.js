@@ -5,6 +5,8 @@ const { authenticate, authorize } = require("../middleware/auth");
 const { getJwtSecret, getJwtExpiresIn } = require("../config/runtime");
 
 const router = express.Router();
+const passwordStrongEnough = (password = "") =>
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,64}$/.test(password);
 
 // ─────────────────────────────────────────────────
 // POST /api/auth/login
@@ -122,6 +124,12 @@ router.post("/register", authenticate, authorize("ADMIN"), async (req, res) => {
 
     if (!adminId || !password) {
       return res.status(400).json({ message: "adminId and password are required" });
+    }
+    if (!passwordStrongEnough(password)) {
+      return res.status(400).json({
+        message:
+          "Password must be 8-64 chars and include uppercase, lowercase, number, and special character",
+      });
     }
     if (!["ADMIN", "MANAGER"].includes(role)) {
       return res.status(400).json({ message: "role must be ADMIN or MANAGER" });

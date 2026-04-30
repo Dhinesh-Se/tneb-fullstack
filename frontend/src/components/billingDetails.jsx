@@ -16,6 +16,7 @@ export default function BillingDetails() {
   const [result, setResult]     = useState(null);
   const [loading, setLoading]   = useState(false);
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [sortOrder, setSortOrder] = useState("DESC");
 
   const handleSearch = async () => {
     if (!search.trim()) { setSearchErr("Please enter a Consumption Number"); return; }
@@ -39,7 +40,38 @@ export default function BillingDetails() {
   const paidBills    = bills.filter((b) => getStatus(b) === "PAID");
   const unpaidTotal  = unpaidBills.reduce((s,b) => s + toN(b.amount || b.Amount), 0);
   const paidTotal    = paidBills.reduce((s,b) => s + toN(b.amount || b.Amount), 0);
-  const filteredBills = statusFilter === "ALL" ? bills : bills.filter((b) => getStatus(b) === statusFilter);
+  const filteredBills = (statusFilter === "ALL" ? bills : bills.filter((b) => getStatus(b) === statusFilter))
+    .slice()
+    .sort((a, b) => {
+      const da = new Date(a.billDate || a.recordedDate || 0).getTime();
+      const db = new Date(b.billDate || b.recordedDate || 0).getTime();
+      return sortOrder === "DESC" ? db - da : da - db;
+    });
+
+  const downloadCsv = () => {
+    if (!filteredBills.length) return;
+    const rows = [
+      ["Bill Date", "Units(kWh)", "Amount", "Status"],
+      ...filteredBills.map((bill) => [
+        fmtDate(bill.billDate || bill.recordedDate),
+        bill.unitsConsumed,
+        bill.amount,
+        getStatus(bill),
+      ]),
+    ];
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `billing-history-${search || "consumer"}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div style={{ minHeight:"100vh", background:"var(--gray-100)", display:"flex", flexDirection:"column" }}>
@@ -138,6 +170,17 @@ export default function BillingDetails() {
                       <option value="PAID">Paid</option>
                       <option value="UNPAID">Unpaid</option>
                     </select>
+                    <select
+                      className="table-filter-input"
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(e.target.value)}
+                    >
+                      <option value="DESC">Newest first</option>
+                      <option value="ASC">Oldest first</option>
+                    </select>
+                    <button className="btn btn-secondary btn-sm" onClick={downloadCsv} disabled={!filteredBills.length}>
+                      ⬇ Export CSV
+                    </button>
                   </div>
                 </div>
                 <div className="table-scroll">
@@ -152,7 +195,7 @@ export default function BillingDetails() {
                         const status = getStatus(bill);
                         return (
                           <tr key={i}>
-                            <td>{fmtDate(bill.recordedDate)}</td>
+                            <td>{fmtDate(bill.billDate || bill.recordedDate)}</td>
                             <td>{bill.unitsConsumed} kWh</td>
                             <td style={{ fontWeight:600 }}>{fmtCur(bill.amount)}</td>
                             <td><span className={`badge badge-${status === "PAID" ? "paid" : "unpaid"}`}>{status === "PAID" ? "✓ Paid" : "✗ Unpaid"}</span></td>
