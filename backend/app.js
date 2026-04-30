@@ -30,12 +30,20 @@ const envOrigins = [
 const allowedOrigins = [...new Set(envOrigins)];
 const allowAllOrigins =
   process.env.ALLOW_ALL_ORIGINS === "true" || allowedOrigins.length === 0;
+const vercelPreviewOriginPattern = /^https:\/\/tneb-fullstack(?:-[a-z0-9-]+)?\.vercel\.app$/i;
 
 app.use(
   cors({
     origin: (origin, cb) => {
       // Allow tools/postman (no origin) and optionally all origins for quick deployments
-      if (!origin || allowAllOrigins || allowedOrigins.includes(origin)) return cb(null, true);
+      if (
+        !origin ||
+        allowAllOrigins ||
+        allowedOrigins.includes(origin) ||
+        vercelPreviewOriginPattern.test(origin)
+      ) {
+        return cb(null, true);
+      }
       cb(new Error(`CORS blocked: ${origin}`));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
