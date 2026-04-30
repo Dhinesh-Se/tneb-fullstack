@@ -14,6 +14,10 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      FRONTEND_FALLBACK_URL: https://tneb-fullstack-nyfs.vercel.app
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
+      MONGO_URI: ${{ secrets.MONGO_URI }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,20 +30,25 @@ jobs:
       - name: Install Vercel CLI
         run: npm i -g vercel@latest
 
-      - name: Pull backend Vercel project settings
-        working-directory: backend
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - name: Validate backend secrets
+        run: |
+          test -n "$JWT_SECRET" || (echo "Missing GitHub secret: JWT_SECRET" && exit 1)
+          test -n "$MONGO_URI" || (echo "Missing GitHub secret: MONGO_URI" && exit 1)
 
-      - name: Build backend
-        working-directory: backend
-        run: vercel build --prod --token="$VERCEL_TOKEN"
+      - name: Pull backend Vercel project settings
+        run: vercel pull --cwd backend --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Deploy backend
         id: deploy
-        working-directory: backend
         run: |
-          URL=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
-          echo "backend_url=$URL" >> "$GITHUB_OUTPUT"
+          URL=$(vercel deploy --cwd backend --prod --yes --token="$VERCEL_TOKEN" \
+            --env ALLOW_ALL_ORIGINS=true \
+            --env CLIENT_URL="https://tneb-fullstack.vercel.app,${FRONTEND_FALLBACK_URL}" \
+            --env JWT_SECRET="$JWT_SECRET" \
+            --env JWT_EXPIRES_IN="${JWT_EXPIRES_IN:-24h}" \
+            --env MONGO_URI="$MONGO_URI")
+          CLEAN_URL=$(echo "$URL" | tail -n 1 | tr -d '\r')
+          echo "backend_url=https://${CLEAN_URL#https://}" >> "$GITHUB_OUTPUT"
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -48,7 +57,7 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      REACT_APP_API_URL: ${{ needs.deploy-backend.outputs.backend_url }}
+      REACT_APP_API_URL: ${{ needs.deploy-backend.outputs.backend_url || 'https://tneb-fullstack.vercel.app' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,15 +71,10 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Pull frontend Vercel project settings
-        working-directory: frontend
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        run: vercel pull --cwd frontend --yes --environment=production --token="$VERCEL_TOKEN"
 
-      - name: Build frontend with backend URL
-        working-directory: frontend
+      - name: Deploy frontend with backend URL
         run: |
-          echo "REACT_APP_API_URL=$REACT_APP_API_URL" > .env.production
-          vercel build --prod --token="$VERCEL_TOKEN"
-
-      - name: Deploy frontend
-        working-directory: frontend
-        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          API_URL="${REACT_APP_API_URL:-https://tneb-fullstack.vercel.app}"
+          echo "Using API URL: $API_URL"
+          vercel deploy --cwd frontend --prod --yes --token="$VERCEL_TOKEN" --build-env REACT_APP_API_URL="$API_URL"
