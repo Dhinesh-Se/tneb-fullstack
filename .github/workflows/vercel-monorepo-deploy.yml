@@ -18,6 +18,7 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
       MONGO_URI: ${{ secrets.MONGO_URI }}
+      MONGO_PUBLIC_URL: ${{ secrets.MONGO_PUBLIC_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +34,7 @@ jobs:
       - name: Validate backend secrets
         run: |
           test -n "$JWT_SECRET" || (echo "Missing GitHub secret: JWT_SECRET" && exit 1)
-          test -n "$MONGO_URI" || (echo "Missing GitHub secret: MONGO_URI" && exit 1)
+          test -n "${MONGO_URI:-$MONGO_PUBLIC_URL}" || (echo "Missing GitHub secret: MONGO_URI or MONGO_PUBLIC_URL" && exit 1)
 
       - name: Pull backend Vercel project settings
         run: vercel pull --cwd backend --yes --environment=production --token="$VERCEL_TOKEN"
@@ -46,7 +47,7 @@ jobs:
             --env CLIENT_URL="https://tneb-fullstack.vercel.app,${FRONTEND_FALLBACK_URL}" \
             --env JWT_SECRET="$JWT_SECRET" \
             --env JWT_EXPIRES_IN="${JWT_EXPIRES_IN:-24h}" \
-            --env MONGO_URI="$MONGO_URI")
+            --env MONGO_URI="${MONGO_URI:-$MONGO_PUBLIC_URL}")
           CLEAN_URL=$(echo "$URL" | tail -n 1 | tr -d '\r')
           echo "backend_url=https://${CLEAN_URL#https://}" >> "$GITHUB_OUTPUT"
 
